@@ -1,0 +1,43 @@
+body {
+    font-family: Helvetica, Arial, sans-serif;
+    display: block;
+    text-align: center;
+    margin-left: auto;
+    margin-right: auto;
+    width: 80%;
+}
+
+p {
+    padding: 20px;
+    /* margin: 30px auto; */
+    /* text-align: center; */
+    font-size: 18px;
+}
+
+
+#drop-area {
+    /* height: 600px;
+    background-color: pink;
+    display: inline-block;
+    border: 1px solid black; */
+    height: 200px;
+    width: 200px;
+    padding: 20px;
+    margin: 0 50px;
+    display: inline-block;
+    border: 1px solid black;
+    background-color: pink;
+
+}
+
+#input-setting-name {
+    margin: 20px 5px;
+	height: 20px;
+    width: 150px;
+}
+
+#input-export-path {
+    margin: 20px 5px;
+	height: 20px;
+    width: 150px;
+}

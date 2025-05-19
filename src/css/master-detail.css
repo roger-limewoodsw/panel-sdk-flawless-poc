@@ -1,0 +1,74 @@
+
+*{
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+}
+html{
+    font-size: 20px;
+    font-family: sans-serif;
+    line-height: 1.6;
+    background-color: white;
+}
+main{
+    display: flex;
+    justify-content: space-around;
+}
+.page{
+    height: 80em;
+    display: block;
+    padding: 1rem;
+    margin: 1rem;
+    /* background-color: #dedede; */
+}
+
+.parameters{
+    height: 100em;
+    width: 60em;
+    text-align: left;
+}
+
+#submit-button-div {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+h1{
+    padding:0.5rem 2rem;
+}
+#detail h1{
+    cursor: pointer;
+}
+.person{
+    list-style: none;
+    border-top: 1px solid #999;
+    padding: 0.2rem 1rem;
+    font-size: 1.0rem;
+    cursor: pointer;
+}
+.person:hover,
+.person.active{
+    background-color: aliceblue;
+}
+.person:last-child{
+    border-bottom: 1px solid #999;
+}
+
+.details{
+    list-style: none;
+    padding: 0.2rem 1rem 1.2rem 1rem;
+    margin: 0.5rem 1rem 0.8rem;
+}
+.lastAccess{
+    color:lightskyblue;
+}
+.avatar{
+    
+}
+.name{
+    
+}
+.isMobile{
+    
+}

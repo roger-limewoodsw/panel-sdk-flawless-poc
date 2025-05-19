@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>AddToGraph Demo</title>
+    <meta name="viewport" content="width=device-width">
+    <link rel="stylesheet" href="./css/main.css">
+    <link rel="stylesheet" href="./css/input-elements.css">
+    <link rel="stylesheet" href="./css/professional-ui.css">
+</head>
+
+<body onbeforeunload="return unload()">
+    <main id="app-container">
+        <div id="control-panel">
+            <button type="submit" id="submit-button" class="action-button">Send Active Sequence</button>
+            <div class="message-container">
+                <input type="text" id="message-input" placeholder="Status & messages appear here..." class="text-input" title="Type a message and press Enter or click Send">
+                <button type="button" id="send-message-button" class="message-button">Send</button>
+                <button type="button" id="clear-message-button" class="clear-button">Clear</button>
+            </div>
+        </div>
+        
+        <div id="output-container">
+            <div id="output-area" class="console-output"></div>
+        </div>
+        
+        <!-- Hidden but still functional drop zone -->
+        <div id="drop-zone" class="hidden-drop-zone"></div>
+        <div id="dropped-content" class="hidden"></div>
+    </main>
+    
+    <!-- Loading the external JavaScript file -->
+    <script src="./main.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,43 @@
+{
+	"category": "suite-plugin",
+	"name": "com.avid.sample.DndResearch",
+	"version": "0.1.0",
+	"displayName": "DnD Research",
+	"description": "Test drag-and-drop from bin",
+	"usesApi": [
+		"avid.mediacomposer.general"
+	],
+	"subscribesToChannels": [
+	],
+	"entitlements": [
+	],
+	"companyPrefix": "avid",
+	"appShortName": "DndResearch",
+	"uiItems": [
+		{
+			"type": "dropdown",
+			"menuName": "Tools",
+			"id": "DndResearch",
+			"displayText": "DnD Research",
+			"windowTitle": "DnD Research",
+			"icon": "static/application.svg",
+			"url": "src/index.html"
+		}
+	],
+	"windowSize": {
+		"initial": {
+			"width": "600",
+			"height": "200"
+		},
+		"minimum": {
+			"width": "600",
+			"height": "200"
+		}
+	},
+	"targetHosts": [
+		"MediaComposer"
+	],
+	"allowedDomains": [],
+	"windowStyle": "floating",
+	"singleton": true
+}
