@@ -1,7 +1,7 @@
 {
-  "name": "dnd-research",
+  "name": "MXF-research",
   "version": "0.1.0",
-  "description": "Sample plugin to demonstrate drag-and-drop",
+  "description": "Sample plugin to demonstrate MXF workflows",
   "private": true,
   "scripts": {
     "test": "echo \"Error: no test sepcified\" && exit 1",

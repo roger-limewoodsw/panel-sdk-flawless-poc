@@ -14,9 +14,14 @@ import {
 } from '../grpc-web/MCAPI_Types_pb.js';
 import { MCAPIClient } from '../grpc-web/MCAPI_grpc_web_pb.js';
 import { Mutex } from 'async-mutex';
-import { importFileIntoAcclaimBin } from './import-to-bin.js';
-import { createSettings, getExportSettingsName, getSequenceExportSettingsName } from './create-settings.js';
+import { importFileIntoImportBin } from './import-to-bin.js';
+import { createSettings} from './create-settings.js';
 import { getActiveSequenceId, nullMobId } from './get-active-service.js';
+import { exportAudioToFile } from './export-audio.js';   
+import { exportVideoToFile } from './export-video.js';
+import { getPathByTaskId } from './utils.js';
+import { get } from 'lodash';
+
 
 // Constants for MIME types
 const MCAPI_ASSETLIST_MIME_TYPE = 'text/x.avid.mc-api-asset-list+json';
@@ -28,6 +33,7 @@ let binReferenceCounts = {};
 const mutex = new Mutex();
 let currentExportPath = "D:/DND-POC"; // Default export path
 let exportName = "";
+let exportVideo = false;
 
 // Log level constants
 export const logFine = 0;
@@ -37,7 +43,7 @@ export const logWarn = 3;
 export const logError = 4;
 
 // Default log level
-export let logLevel = logInfo;
+export let logLevel = logDebug;
 
 // DOM elements
 let dropArea, droppedContent, outputArea, submitButton, messageInput;
@@ -108,7 +114,7 @@ function initApp() {
         displayTextWarn("Message input not found");
     }
  
-    displayText("Media Composer integration initialized");
+    displayTextInfo("Media Composer integration initialized");
 }
 
 // Function to send message from the text input
@@ -117,9 +123,20 @@ function sendMessage(message) {
     
     // You can add actual message sending functionality here
     // For example, if you want to send this as a command or notification to Media Composer
-    
-    exportName = message;
-    updateMessageInput("Processing: " + message);
+    if ("video" === message) {
+        exportVideo = true;
+        displayTextDebug("Export video set to true");
+    } else if ("audio" === message) {
+        exportVideo = false;
+        displayTextDebug("Export video set to false");
+    } else if (message  === "clear") {
+        exportName = "";
+        displayTextDebug("Export name cleared");
+        updateMessageInput("Processing: Cleared export name");
+    } else {
+        exportName = message;
+        updateMessageInput("Processing: " + message);
+    }
     
 }
 
@@ -238,7 +255,7 @@ async function handleMediaComposerDrop(e) {
     }
 }
 
-let getMobInfoThenExport = function(mob_id, mobType) {
+async function getMobInfoThenExport(mob_id, mobType) {
     displayTextDebug("getMobInfoThenExport: " + mob_id);
     var mobName = mob_id;
     var request = new GetMobInfoRequest();
@@ -275,95 +292,15 @@ let getMobInfoThenExport = function(mob_id, mobType) {
             exportFileName = exportName;
         }
         displayTextInfo(`Completed, export fileName: ${exportFileName}`);
-
-        exportToFile(mob_id, mobType, currentExportPath, exportFileName);
+        let exportSuccess = false;
+        if (exportVideo) {
+            exportSuccess = exportVideoToFile(mcapiclient, mob_id, mobType, currentExportPath, exportFileName);
+        } else {
+            exportSuccess = exportAudioToFile(mcapiclient, mob_id, mobType, currentExportPath, exportFileName);
+        }
     });
 }
 
-let exportToFile = function(mob_id, mobType, destinationPath, fileName) {
-    displayTextDebug("exportToFile: " + mob_id + ", mobType: " + mobType + ", destinationPath: " + destinationPath + ", fileName: " + fileName);
-    updateMessageInput("Processing: Preparing export for " + fileName);
-
-    let request = new ExportFileRequest();
-    let exportFileRequestBody = new ExportFileRequestBody();
-    exportFileRequestBody.setMobId(mob_id);
-    let exportSettingsName = "";
-
-    if (mobType == "sequence")
-        exportSettingsName = getSequenceExportSettingsName();
-    else if (mobType == "masterclip" || mobType == "subclip")
-        exportSettingsName = getExportSettingsName();
-    else {
-        displayTextError("Unknown mobType: " + mobType);
-        updateMessageInput("Error: Unknown media type - " + mobType);
-        return;
-    }
-
-    displayTextDebug("exportSettingsName: " + exportSettingsName);
-    updateMessageInput("Processing: Exporting with " + exportSettingsName + " settings...");
-
-    exportFileRequestBody.setExportSettingsName(exportSettingsName);
-    exportFileRequestBody.setDestinationPath(destinationPath);
-    exportFileRequestBody.setInDirectory("");
-    exportFileRequestBody.setFileName(fileName);
-
-    request.setBody(exportFileRequestBody);
-
-    let md = {
-        accessToken: mcapi.getAccessToken()
-    };
-    // Export to file and display path (or error message in the case of failure).
-    mcapiclient.exportFile(request, md, (err, response) => {
-        if (err) {
-            // If message can be converted to JSON we should use ErrorType from .proto
-            try {
-                const jsonData = JSON.parse(err.message);
-
-                switch (jsonData.ErrorType) {
-                    case CommandErrorType.MC_EXPORTSETTINGSNOTFOUND:
-                        {
-                            console.log(jsonData.ErrorMessage);
-                            let errorMessage = `Unexpected error: ErrorType = ${jsonData.ErrorType}` + `, message = "${jsonData.ErrorMessage}"`;
-                            displayTextError("Export error: " + errorMessage);
-                            updateMessageInput("Error: Export settings not found");
-                        }
-                        break;
-                        
-                    default:
-                        displayTextError("Export error: " + jsonData.ErrorMessage);
-                        updateMessageInput("Error: " + jsonData.ErrorMessage);
-                        break;
-                }
-
-            } catch (error) { // if message is not JSON we should use gRPC error codes
-                let errorMessage = `Unexpected error: Code = ${err.code}` + `, message = "${err.message}"`;
-                displayTextError("Export error: " + errorMessage);
-                updateMessageInput("Error: Export failed with code " + err.code);
-
-                // For err.code we should use gRPC status codes https://grpc.github.io/grpc/core/md_doc_statuscodes.html
-                switch (err.code) {
-                    case 3: // (DATA_LOSS)
-                        {
-                            let errorMessage = `Unexpected error: ErrorType = ${jsonData.ErrorType}` + `, message = "${jsonData.ErrorMessage}"`;
-                            displayTextError("Export error: " + errorMessage);
-                            updateMessageInput("Error: Data loss during export");
-                        }
-                        break;
-                        
-                    default:
-                        break;
-                }
-
-                // Inform Media Composer of errors as Media Composer may not receive the request at all due to some components is offline
-                mcapi.reportError(err.code, err.message);
-            }            
-        } else {
-            // Display path to file.
-            displayTextDebug("Export file start successfully.");
-            updateMessageInput("Status: Export started successfully");
-        }
-    });
-};
 
 // Get metadata for API calls
 function getMetadata() {
@@ -465,19 +402,25 @@ function unload() {
     return;
 }
 
-function onExportFileFinished(exportPath, errorString, errorCode) {
-    displayText("Export file finished");
+function onExportFileFinished(taskId, exportPath, errorString, errorCode) {
+    displayTextDebug("Export file finished");
     if (errorCode == CommandErrorType.NOERROR) {
-        displayText("Export file finished successfully. Path: " + exportPath);
-        updateMessageInput("Success: Export completed - " + exportPath);
-        displayText("calling import function");
-        updateMessageInput("Processing: Importing to Acclaim bin...");
-        importFileIntoAcclaimBin(mcapiclient, exportPath);
+        let importPath = exportPath;
+        let tmpPath = getPathByTaskId(taskId);
+        if (null != tmpPath) {
+            displayTextDebug("Export file finished, getting path from registry - taskId: " + taskId + ", path: " + tmpPath);
+            importPath = tmpPath;
+        }
+        displayTextDebug("Export file finished successfully. Path: " + importPath);
+        updateMessageInput("Success: Export completed - " + importPath);
+        displayTextDebug("calling import function");
+        updateMessageInput("Processing: Importing to Processed Clips bin...");
+        importFileIntoImportBin(mcapiclient, importPath);
         return;
     }
     else {      
         let errorMessage = `Unexpected error: ErrorType = ${errorCode}` + `, message = "${errorString}"`;
-        displayText("Export error: " + errorMessage);
+        displayTextError("Export error: " + errorMessage);
         updateMessageInput("Error: Export failed - " + errorString);
     }
 }
@@ -485,13 +428,15 @@ function onExportFileFinished(exportPath, errorString, errorCode) {
 function registerNotifications() {
     if (typeof mcapi !== 'undefined' && mcapi.onEvent) {
         mcapi.onEvent.connect(function (eventName, eventData) {
-            displayText("Event received: " + eventName);
+            displayTextDebug("Event received: " + eventName);
             switch (eventName) {
                 case "ExportFileFinished":
                     {
                         const jsonData = JSON.parse(eventData);
-                        displayText("jsonData.taskId: " + jsonData.taskId);
-                        onExportFileFinished(jsonData.exportPath, jsonData.errorString, jsonData.errorCode);
+                        displayTextDebug("ExportFileFinished event received" + JSON.stringify(jsonData));
+                        
+                        displayTextDebug("jsonData.taskId: " + jsonData.taskId);
+                        onExportFileFinished(jsonData.taskId, jsonData.exportPath, jsonData.errorString, jsonData.errorCode);
                     }
                     break;
                 default:
@@ -506,27 +451,27 @@ function registerNotifications() {
 
 // Modified for various status updates
 async function activeSequence_submit() {
-    displayText("Sending active sequence...");
+    displayTextDebug("Sending active sequence...");
     updateMessageInput("Processing: Getting active sequence...");
 
     try {
         updateMessageInput("Processing: Creating settings...");
         await createSettings(mcapiclient);
-        displayText('Settings created successfully');
+        displayTextDebug('Settings created successfully');
     } catch (error) {
-        displayText(`Error creating settings: ${error.message}`);
+        displayTextError(`Error creating settings: ${error.message}`);
         updateMessageInput("Error: Failed to create settings");
         return;
     }
 
     updateMessageInput("Processing: Getting sequence ID...");
     getActiveSequenceId(mcapiclient).then((mobId) => { 
-        displayText("Exporting sequence: " + mobId);
+        displayTextDebug("Exporting sequence: " + mobId);
         updateMessageInput("Processing: Exporting sequence " + mobId);
         getMobInfoThenExport(mobId, "sequence");
     }
     ).catch((error) => {
-        displayText("Error getting active sequence ID: " + error);
+        displayTextError("Error getting active sequence ID: " + error);
         updateMessageInput("Error: Failed to get sequence ID");
         return;
     });

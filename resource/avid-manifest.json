@@ -1,9 +1,9 @@
 {
 	"category": "suite-plugin",
-	"name": "com.avid.sample.DndResearch",
+	"name": "com.avid.sample.MXFResearch",
 	"version": "0.1.0",
-	"displayName": "DnD Research",
-	"description": "Test drag-and-drop from bin",
+	"displayName": "MXF Research",
+	"description": "Test MXF workflows",
 	"usesApi": [
 		"avid.mediacomposer.general"
 	],
@@ -12,14 +12,14 @@
 	"entitlements": [
 	],
 	"companyPrefix": "avid",
-	"appShortName": "DndResearch",
+	"appShortName": "MXFResearch",
 	"uiItems": [
 		{
 			"type": "dropdown",
 			"menuName": "Tools",
-			"id": "DndResearch",
-			"displayText": "DnD Research",
-			"windowTitle": "DnD Research",
+			"id": "MXFResearch",
+			"displayText": "MXF Research",
+			"windowTitle": "MXF Research",
 			"icon": "static/application.svg",
 			"url": "src/index.html"
 		}

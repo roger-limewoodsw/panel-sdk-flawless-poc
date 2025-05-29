@@ -9,11 +9,11 @@ import { displayText, displayTextDebug, displayTextError, displayTextFine, displ
 import { getImportSettingsName, updateMessageImput } from './create-settings.js';
 
 
-var eisonBinName = "ESION processed.avb";
+var importBinName = "Processed Clips.avb";
 
 
 var openBin = function (mcapiclient, binName, callback) {
-    displayTextDebug("opening Acclaim bin...");
+    displayTextDebug("opening imported clips bin...");
     const request = new OpenBinRequest();
     const body = new OpenBinRequestBody();
     body.setBinPath(binName);
@@ -71,20 +71,19 @@ var importFile = function (mcapiclient, filepath, binName) {
     });
 }
 
-//export var importFileIntoAcclaimBin = function(mcapiclient, filepath) {
-export function importFileIntoAcclaimBin(mcapiclient, filepath) {
-    displayTextDebug("Importing file into Acclaim bin..." + filepath);
-    openBin(mcapiclient, eisonBinName, (binExists) => {
+export function importFileIntoImportBin(mcapiclient, filepath) {
+    displayTextDebug("Importing file into Imported Clips bin..." + filepath);
+    openBin(mcapiclient, importBinName, (binExists) => {
         displayTextDebug("ifia: openBin callback called...");
         if (binExists) {
             displayTextDebug("Bin exists.");
-            importFile(mcapiclient, filepath, eisonBinName);
+            importFile(mcapiclient, filepath, importBinName);
         } else {
-            displayTextDebug("Bin does not exist, creating it. " + eisonBinName);
-            createBin(mcapiclient, eisonBinName, (binCreated) => {
+            displayTextDebug("Bin does not exist, creating it. " + importBinName);
+            createBin(mcapiclient, importBinName, (binCreated) => {
                 if (binCreated) {
                     displayTextDebug("Bin created successfully, importing file.");
-                    importFile(mcapiclient, filepath, eisonBinName);
+                    importFile(mcapiclient, filepath, importBinName);
                 } else {
                     displayTextError("Failed to create bin.");
                 }

@@ -29,7 +29,7 @@ export function getActiveSequenceId(mcapiclient) {
                     reject(new Error("getViewerMobs response body is undefined"));
                     return;
                 }
-                displayTextDebug("getViewerMobs response received: " + JSON.stringify(responseBody));
+                //displayTextDebug("getViewerMobs response received: " + JSON.stringify(responseBody));
                 let mobInfoList = responseBody.getMobsList();
                 let found = false;
                 for (let mobInfo of mobInfoList) {

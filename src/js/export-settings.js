@@ -1,9 +1,9 @@
 
-export var getExportSettingsXml = function() {
+export var getWaveAudioExportSettingsXml = function() {
   return exportSettingsXml;
 }
 
-export var getSequenceExportSettingsXml = function() {
+export var getSequenceWaveAudioExportSettingsXml = function() {
   return sequenceExportSettingsXml;
 }
 

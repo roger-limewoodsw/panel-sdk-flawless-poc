@@ -5,16 +5,20 @@ import { displayText, displayTextDebug, displayTextError, displayTextFine, displ
 import { Mutex } from 'async-mutex';
 
 import { getImportSettingsXml } from './import-settings.js';
-import { getExportSettingsXml, getSequenceExportSettingsXml } from './export-settings.js';
+import { getWaveAudioExportSettingsXml, getSequenceWaveAudioExportSettingsXml } from './export-settings.js';
+import { getVideoExportSettingsXml } from './video-settings.js';
 
-const exportSettingsName = "export-acclaim";
-const exportSettingUUID = "c2c404c2-e098-47f1-ad3a-22b3c5bd0ca1";
+const exportWaveAudioSettingsName = "my-panel-exp-audio";
+const exportWaveAudioSettingUUID = "2321d81f-d87a-4885-8e31-cd12306c34e3";
 
-const sequenceExportSettingsName = "seqexport-acclaim";
-const sequenceExportSettingUUID = "bfce0ba0-5e4d-4f62-9302-f13621f2c80a";
+const exportSequenceWaveAudioSettingsName = "my-panel-exp-seqaudio";
+const exportSequenceWaveAudioSettingUUID = "ad893121-3bf8-4d15-a1dc-39a6cc47c78d";
 
-const importSettingsName = "import-acclaim";
-const importSettingUUID = "2334e325-efb8-43fa-82a1-2f8dce01ab95";
+const exportVideoSettingsName = "my-panel-exp-video-1";
+const exportVideoSettingUUID = "271cf7bb-0494-4b2b-bd33-7cde528b7bda";
+
+const importSettingsName = "my-panel-import-file";
+const importSettingUUID = "2782a996-ca33-40e5-a30b-df6ac4337604";
 
 var settingsCreated = false;
 
@@ -35,6 +39,15 @@ export var createSettings = async function(mcapiclient) {
             }
         });
 
+        displayTextDebug("Creating video export settings...");
+        const exportVideoSuccess = await loadSetting(mcapiclient, exportVideoSettingUUID, exportVideoSettingsName, getVideoExportSettingsXml());
+        
+        if (!exportVideoSuccess) {
+            displayTextError("Error loading video export settings: " + exportVideoSettingsName);
+        } else {
+            displayTextDebug("Video export settings loaded successfully: " + exportVideoSettingsName);
+        }
+
         displayTextDebug("Creating import settings...");
         const importSuccess = await loadSetting(mcapiclient, importSettingUUID, importSettingsName, getImportSettingsXml());
         
@@ -45,24 +58,24 @@ export var createSettings = async function(mcapiclient) {
         }
         
         displayTextDebug("Creating base export settings...");
-        const exportSuccess = await loadSetting(mcapiclient, exportSettingUUID, exportSettingsName, getExportSettingsXml());
+        const exportSuccess = await loadSetting(mcapiclient, exportWaveAudioSettingUUID, exportWaveAudioSettingsName, getWaveAudioExportSettingsXml());
         
         if (!exportSuccess) {
-            displayTextError("Error loading export settings: " + exportSettingsName);
+            displayTextError("Error loading export settings: " + exportWaveAudioSettingsName);
         } else {
-            displayTextDebug("Export settings loaded successfully: " + exportSettingsName);
+            displayTextDebug("Export settings loaded successfully: " + exportWaveAudioSettingsName);
         }
         
         displayTextDebug("Creating sequence export settings...");
-        const sequenceExportSuccess = await loadSetting(mcapiclient, sequenceExportSettingUUID, sequenceExportSettingsName, getSequenceExportSettingsXml());
+        const sequenceExportSuccess = await loadSetting(mcapiclient, exportSequenceWaveAudioSettingUUID, exportSequenceWaveAudioSettingsName, getSequenceWaveAudioExportSettingsXml());
         
         if (!sequenceExportSuccess) {
-            displayTextError("Error loading sequence export settings: " + sequenceExportSettingsName);
+            displayTextError("Error loading sequence export settings: " + exportSequenceWaveAudioSettingsName);
         } else {
-            displayTextDebug("Sequence export settings loaded successfully: " + sequenceExportSettingsName);
+            displayTextDebug("Sequence export settings loaded successfully: " + exportSequenceWaveAudioSettingsName);
         }
         
-        return { importSuccess, exportSuccess, sequenceExportSuccess };
+        return { importSuccess, exportSuccess, sequenceExportSuccess, exportVideoSuccess };
     } catch (error) {
         displayTextError("Exception occurred while creating settings: " + error.message);
         throw error;
@@ -73,12 +86,16 @@ export var getImportSettingsName = function() {
     return importSettingsName;
 }
 
-export var getExportSettingsName = function() {
-    return exportSettingsName;
+export var getWaveAudioExportSettingsName = function() {
+    return exportWaveAudioSettingsName;
 }
 
-export var getSequenceExportSettingsName = function() {
-    return sequenceExportSettingsName;
+export var getSequenceWaveAudioExportSettingsName = function() {
+    return exportSequenceWaveAudioSettingsName;
+}
+
+export var getVideoExportSettingsName = function() {
+    return exportVideoSettingsName;
 }
 
 var loadSetting = function(mcapiclient, settingUUID, settingsName, settingData) {

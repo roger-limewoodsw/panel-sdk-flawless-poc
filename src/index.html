@@ -13,7 +13,9 @@
 <body onbeforeunload="return unload()">
     <main id="app-container">
         <div id="control-panel">
-            <button type="submit" id="submit-button" class="action-button">Send Active Sequence</button>
+            <div class="button-container">
+                <button type="submit" id="submit-button" class="action-button">Send Active Sequence</button>
+            </div>
             <div class="message-container">
                 <input type="text" id="message-input" placeholder="Status & messages appear here..." class="text-input" title="Type a message and press Enter or click Send">
                 <button type="button" id="send-message-button" class="message-button">Send</button>
